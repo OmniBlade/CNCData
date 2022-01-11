@@ -337,7 +337,6 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/vanillara
 )
 
 # CPack settings.
-set(CPACK_SET_DESTDIR TRUE) # Enabling absolute paths for CPack (important!)
 set(CPACK_SOURCE_GENERATOR "TGZ") # This file format is used to package source code ("make package_source")
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_PROJECT_NAME};ALL;/")
 set(CPACK_PACKAGE_VENDOR "Assembly Armada")
@@ -349,7 +348,6 @@ set(CPACK_COMPONENT_VANILLARADATA_DISPLAYNAME "RA Data")
 set(CPACK_PACKAGE_FILE_NAME "vanilla-conquer-data-installer-${DATASET_NAME}")
 
 if(WIN32)
-    set(CPACK_SET_DESTDIR OFF)
     set(CPACK_GENERATOR "NSIS")
 
     set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)

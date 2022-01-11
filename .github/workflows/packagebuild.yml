@@ -1,0 +1,73 @@
+name: build_packages
+
+on:
+  pull_request:
+  push:
+  
+jobs:
+  package_builder:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        buildtype: [demo, freeware, full]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+        
+    - name: Set Git Info
+      id: gitinfo
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      
+    - name: Set variables
+      id: vars
+      run: |
+        if [ "${{ matrix.buildtype }}" = "demo" ]
+        then
+          echo "::set-output name=cmake_build::BUILD_DEMO"
+        elif [ "${{ matrix.buildtype }}" = "freeware" ]
+        then
+          echo "::set-output name=cmake_build::BUILD_FREEWARE"
+        else
+          echo "::set-output name=cmake_build::BUILD_FULL"
+        fi
+        
+    - name: Install Dependencies
+      run: |
+        sudo apt-get install -qq -y nsis > /dev/null
+        
+    - name: Configure Vanilla Conquer Data
+      run: |
+        cmake -DCMAKE_BUILD_TYPE=Release -D${{ steps.vars.outputs.cmake_build }}=ON -DCMAKE_INSTALL_PREFIX=/usr -B build
+        
+    - name: Build Vanilla Conquer Data Packages
+      run: |
+        cmake --build build -- -j 4
+        cd build
+        cpack
+        LC_ALL=C cpack -G NSIS
+        
+    - name: Prepare Archive Data
+      run: |
+        mkdir artifact
+        mv ./build/vanilla-conquer-data-installer-${{ matrix.buildtype }}.zip artifact/
+        mv ./build/vanilla-conquer-data-installer-${{ matrix.buildtype }}.exe artifact/
+        mv ./build/vanilla-conquer-data-installer-${{ matrix.buildtype }}.deb artifact/
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: vanilla-conquer-data-${{ matrix.buildtype }}
+        path: artifact
+    
+    - name: Upload tagged release
+      if: ${{ startsWith(github.ref, 'refs/tags/') }}
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifact/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
