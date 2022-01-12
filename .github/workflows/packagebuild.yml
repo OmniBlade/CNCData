@@ -47,15 +47,20 @@ jobs:
       run: |
         cmake --build build -- -j 4
         cd build
-        cpack
-        LC_ALL=C cpack -G NSIS
+        cpack --config CPackConfig-TD.cmake
+        cpack --config CPackConfig-RA.cmake
+        LC_ALL=C cpack -G NSIS --config CPackConfig-TD.cmake
+        LC_ALL=C cpack -G NSIS --config CPackConfig-RA.cmake
         
     - name: Prepare Archive Data
       run: |
         mkdir artifact
-        mv ./build/vanilla-conquer-data-installer-${{ matrix.buildtype }}.zip artifact/
-        mv ./build/vanilla-conquer-data-installer-${{ matrix.buildtype }}.exe artifact/
-        mv ./build/vanilla-conquer-data-installer-${{ matrix.buildtype }}.deb artifact/
+        mv ./build/vanilla-conquer-data-installer-td-${{ matrix.buildtype }}.zip artifact/
+        mv ./build/vanilla-conquer-data-installer-td-${{ matrix.buildtype }}.exe artifact/
+        mv ./build/vanilla-conquer-data-installer-td-${{ matrix.buildtype }}.deb artifact/
+        mv ./build/vanilla-conquer-data-installer-ra-${{ matrix.buildtype }}.zip artifact/
+        mv ./build/vanilla-conquer-data-installer-ra-${{ matrix.buildtype }}.exe artifact/
+        mv ./build/vanilla-conquer-data-installer-ra-${{ matrix.buildtype }}.deb artifact/
         
     - name: Upload artifact
       uses: actions/upload-artifact@v2

@@ -316,7 +316,8 @@ if(WIN32)
 endif()
 
 add_custom_target(create_zip ALL
-    COMMAND ${CMAKE_COMMAND} -E tar "cfv" "vanilla-conquer-data-installer-${DATASET_NAME}.zip" --format=zip vanillara vanillatd
+    COMMAND ${CMAKE_COMMAND} -E tar "cfv" "vanilla-conquer-data-installer-td-${DATASET_NAME}.zip" --format=zip vanillatd
+    COMMAND ${CMAKE_COMMAND} -E tar "cfv" "vanilla-conquer-data-installer-ra-${DATASET_NAME}.zip" --format=zip vanillara
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS ${DATASET_ZIP_DEPENDS}
 )
@@ -342,19 +343,17 @@ set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_PROJECT_NA
 set(CPACK_PACKAGE_VENDOR "Assembly Armada")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "VanillaConquer")
 set(CPACK_COMPONENTS_GROUPING ONE_PER_GROUP)
-set(CPACK_COMPONENTS_ALL VanillaTDData VanillaRAData)
 set(CPACK_COMPONENT_VANILLATDDATA_DISPLAYNAME "TD Data")
 set(CPACK_COMPONENT_VANILLARADATA_DISPLAYNAME "RA Data")
-set(CPACK_PACKAGE_FILE_NAME "vanilla-conquer-data-installer-${DATASET_NAME}")
 
 if(WIN32)
     set(CPACK_GENERATOR "NSIS")
-
-    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-    set(CPACK_NSIS_DISPLAY_NAME "Vanilla Conquer")
-    set(CPACK_NSIS_PACKAGE_NAME "Vanilla Conquer")
 endif()
 
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+set(CPACK_NSIS_DISPLAY_NAME "Vanilla Conquer")
+set(CPACK_NSIS_PACKAGE_NAME "Vanilla Conquer")
+	
 if(UNIX)
   if(CMAKE_SYSTEM_NAME MATCHES "Linux")
     set(SPECIFIC_SYSTEM_VERSION_NAME "${CMAKE_SYSTEM_NAME}")
@@ -425,4 +424,15 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "vanilla-conquer")
 set(CPACK_RPM_PACKAGE_LICENSE "Unknown License")
 set(CPACK_RPM_PACKAGE_VENDOR "Assembly Armada")
 
-include(CPack)
+function(create_cpack_config filename)
+   set(CPACK_OUTPUT_CONFIG_FILE "${filename}")
+   include(CPack)
+endfunction(create_cpack_config)
+
+set(CPACK_COMPONENTS_ALL VanillaTDData)
+set(CPACK_PACKAGE_FILE_NAME "vanilla-conquer-data-installer-td-${DATASET_NAME}")
+create_cpack_config(CPackConfig-TD.cmake)
+
+set(CPACK_COMPONENTS_ALL VanillaRAData)
+set(CPACK_PACKAGE_FILE_NAME "vanilla-conquer-data-installer-ra-${DATASET_NAME}")
+create_cpack_config(CPackConfig-RA.cmake)
